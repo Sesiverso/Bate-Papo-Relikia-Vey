@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-setup {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .profile-setup h2 {
+            margin-top: 0;
+        }
+        .profile-setup img {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .chat-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+        .chat-box div {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .chat-box img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .chat-box .file {
+            max-width: 300px;
+            margin-top: 10px;
+        }
+        input[type="text"] {
+            width: calc(100% - 100px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-setup" id="profile-setup">
+            <h2>Escolha seu perfil</h2>
+            <input type="text" id="username" placeholder="Insira seu nome aqui">
+            <div>
+                <img src="https://www.diariodepernambuco.com.br/static/app/noticia_127983242361/2024/05/16/952809/20240516183727142193o.jpg" alt="Perfil 1" onclick="selectProfile('https://www.diariodepernambuco.com.br/static/app/noticia_127983242361/2024/05/16/952809/20240516183727142193o.jpg')">
+                <img src="https://preview.redd.it/what-is-your-favorite-sonic-meme-v0-t1pv65foxajb1.png?auto=webp&s=cc05c260c19666d0cb4feeb40298d37fad5066c5" alt="Perfil 2" onclick="selectProfile('https://preview.redd.it/what-is-your-favorite-sonic-meme-v0-t1pv65foxajb1.png?auto=webp&s=cc05c260c19666d0cb4feeb40298d37fad5066c5')">
+                <img src="https://preview.redd.it/recreating-the-you-have-alerted-the-sonic-meme-v0-ivping97ll2a1.png?auto=webp&s=ca4d75183fbfe04464e31a7e6603bbda171b343c" alt="Perfil 3" onclick="selectProfile('https://preview.redd.it/recreating-the-you-have-alerted-the-sonic-meme-v0-ivping97ll2a1.png?auto=webp&s=ca4d75183fbfe04464e31a7e6603bbda171b343c')">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9CKPkXd8vEKt-eSTnaYXRdXh6xh_8ciGoPQ&s" alt="Perfil 4" onclick="selectProfile('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9CKPkXd8vEKt-eSTnaYXRdXh6xh_8ciGoPQ&s')">
+                <img src="https://imagenes.elpais.com/resizer/v2/GLK77QHJ4JAY3KAFM5FV6YV5OM.webp?auth=09c184fe292b2932d6e90d1e57fd1dc21e111cc2044559c1cc5f7e5e04ae249d&width=414" alt="Perfil 5" onclick="selectProfile('https://imagenes.elpais.com/resizer/v2/GLK77QHJ4JAY3KAFM5FV6YV5OM.webp?auth=09c184fe292b2932d6e90d1e57fd1dc21e111cc2044559c1cc5f7e5e04ae249d&width=414')">
+                <img src="https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/WZEUY7Q6GMI6ZPVIGCHKCNCZJ4.jpg" alt="Perfil 6" onclick="selectProfile('https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/WZEUY7Q6GMI6ZPVIGCHKCNCZJ4.jpg')">
+            </div>
+            <button id="profile-setup-button">OK</button>
+        </div>
+
+        <div class="chat-section" id="chat-section" style="display:none;">
+            <h2>Chat</h2>
+            <div id="messages" class="chat-box"></div>
+            <input type="file" id="file-input" />
+            <input type="text" id="message-input" placeholder="Digite sua mensagem...">
+            <button id="send-button">Enviar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfVXG-xIe4FyPpsNTtmV__HutzOQFgaVQ",
+            authDomain: "votacao-da4e2.firebaseapp.com",
+            projectId: "votacao-da4e2",
+            storageBucket: "votacao-da4e2.appspot.com",
+            messagingSenderId: "696185234268",
+            appId: "1:696185234268:web:37e1ddd097dfeea95a9799",
+            measurementId: "G-PY9XXN0ESV"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const storage = getStorage(app);
+
+        // Configura o perfil do usuário
+        const selectProfile = (imageUrl) => {
+            const username = document.getElementById('username').value.trim();
+            if (username === '' || !imageUrl) {
+                alert('Por favor, insira um nome e selecione uma imagem de perfil.');
+                return;
+            }
+
+            localStorage.setItem('username', username);
+            localStorage.setItem('profileImage', imageUrl);
+
+            document.getElementById('profile-setup').style.display = 'none';
+            document.getElementById('chat-section').style.display = 'block';
+            displayMessages();
+        };
+
+        // Envia uma mensagem para o Firebase
+        const sendMessage = async () => {
+            const messageInput = document.getElementById('message-input');
+            const fileInput = document.getElementById('file-input');
+            const message = messageInput.value.trim();
+
+            if (message === '' && fileInput.files.length === 0) {
+                alert('Digite uma mensagem ou selecione um arquivo.');
+                return;
+            }
+
+            const username = localStorage.getItem('username');
+            const profileImage = localStorage.getItem('profileImage');
+
+            let fileUrl = '';
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const fileName = Date.now() + '-' + file.name;
+                const fileRef = storageRef(storage, fileName);
+                await uploadBytes(fileRef, file);
+                fileUrl = await getDownloadURL(fileRef);
+            }
+
+            const messageData = {
+                username: username,
+                image: profileImage,
+                message: message,
+                file: fileUrl
+            };
+
+            push(ref(database, 'messages'), messageData);
+
+            messageInput.value = '';
+            fileInput.value = '';
+        };
+
+        // Exibe as mensagens no chat
+        const displayMessages = () => {
+            onValue(ref(database, 'messages'), (snapshot) => {
+                const messages = snapshot.val();
+                const messagesContainer = document.getElementById('messages');
+                messagesContainer.innerHTML = '';
+
+                for (const id in messages) {
+                    const msg = messages[id];
+                    const messageDiv = document.createElement('div');
+                    const profileImg = document.createElement('img');
+                    const messageText = document.createElement('div');
+                    
+                    profileImg.src = msg.image;
+                    
+                    messageText.innerHTML = `<strong>${msg.username}:</strong> ${msg.message}`;
+                    
+                    if (msg.file) {
+                        const fileElement = document.createElement('a');
+                        fileElement.href = msg.file;
+                        fileElement.target = '_blank';
+                        fileElement.innerText = 'Arquivo';
+                        fileElement.className = 'file';
+                        messageDiv.appendChild(fileElement);
+                    }
+
+                    messageDiv.appendChild(profileImg);
+                    messageDiv.appendChild(messageText);
+                    messagesContainer.appendChild(messageDiv);
+                }
+            });
+        };
+
+        // Configura eventos
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('profile-setup-button').addEventListener('click', () => {
+            const imageUrl = document.querySelector('img[onclick]').src;
+            selectProfile(imageUrl);
+        });
+    </script>
+</body>
+</html>
