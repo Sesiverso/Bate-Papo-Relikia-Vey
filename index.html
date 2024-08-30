@@ -1,60 +1,90 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Interativo</title>
+    <title>Chat com Firebase</title>
     <style>
-        /* Adicione aqui o CSS para estilizar o layout */
-        #profile-setup, #chat-section {
-            display: none;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
         }
-        .profile-img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+            border-radius: 4px;
+        }
+        #messageInput {
+            width: calc(100% - 120px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #sendButton, #fileInput {
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
             cursor: pointer;
+            margin-left: 10px;
         }
-        #profile-images img {
-            width: 100px;
-            height: 100px;
-            margin: 10px;
-            border-radius: 10px;
-            cursor: pointer;
+        #fileInput {
+            background-color: #28a745;
         }
-        .file {
-            display: block;
-            margin-top: 5px;
+        #sendButton:hover, #fileInput:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <div id="profile-setup">
-        <h2>Configurar Perfil</h2>
-        <label for="username">Nome:</label>
-        <input type="text" id="username" placeholder="Insira seu nome aqui">
-        <div id="profile-images">
-            <img src="https://www.diariodepernambuco.com.br/static/app/noticia_127983242361/2024/05/16/952809/20240516183727142193o.jpg" alt="Perfil 1" onclick="selectProfileImage(this.src)">
-            <img src="https://preview.redd.it/what-is-your-favorite-sonic-meme-v0-t1pv65foxajb1.png?auto=webp&s=cc05c260c19666d0cb4feeb40298d37fad5066c5" alt="Perfil 2" onclick="selectProfileImage(this.src)">
-            <img src="https://preview.redd.it/recreating-the-you-have-alerted-the-sonic-meme-v0-ivping97ll2a1.png?auto=webp&s=ca4d75183fbfe04464e31a7e6603bbda171b343c" alt="Perfil 3" onclick="selectProfileImage(this.src)">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9CKPkXd8vEKt-eSTnaYXRdXh6xh_8ciGoPQ&s" alt="Perfil 4" onclick="selectProfileImage(this.src)">
-            <img src="https://imagenes.elpais.com/resizer/v2/GLK77QHJ4JAY3KAFM5FV6YV5OM.webp?auth=09c184fe292b2932d6e90d1e57fd1dc21e111cc2044559c1cc5f7e5e04ae249d&width=414" alt="Perfil 5" onclick="selectProfileImage(this.src)">
-            <img src="https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/WZEUY7Q6GMI6ZPVIGCHKCNCZJ4.jpg" alt="Perfil 6" onclick="selectProfileImage(this.src)">
+    <div class="container">
+        <h1>Chat com Firebase</h1>
+        <input type="text" id="username" placeholder="Insira seu nome aqui" />
+        <div>
+            <button onclick="selectProfileImage('https://www.diariodepernambuco.com.br/static/app/noticia_127983242361/2024/05/16/952809/20240516183727142193o.jpg')">
+                <img src="https://www.diariodepernambuco.com.br/static/app/noticia_127983242361/2024/05/16/952809/20240516183727142193o.jpg" width="50" alt="Profile Pic 1">
+            </button>
+            <button onclick="selectProfileImage('https://preview.redd.it/what-is-your-favorite-sonic-meme-v0-t1pv65foxajb1.png?auto=webp&s=cc05c260c19666d0cb4feeb40298d37fad5066c5')">
+                <img src="https://preview.redd.it/what-is-your-favorite-sonic-meme-v0-t1pv65foxajb1.png?auto=webp&s=cc05c260c19666d0cb4feeb40298d37fad5066c5" width="50" alt="Profile Pic 2">
+            </button>
+            <!-- Add more profile picture options as needed -->
         </div>
-        <button id="profile-setup-button">OK</button>
-    </div>
-
-    <div id="chat-section">
         <div id="messages"></div>
-        <input type="text" id="message-input" placeholder="Digite sua mensagem...">
-        <input type="file" id="file-input">
-        <button id="send-button">Enviar</button>
+        <input type="text" id="message" placeholder="Digite sua mensagem aqui" />
+        <input type="file" id="fileInput" />
+        <button id="sendButton">Enviar</button>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js"></script>
-    <script src="script.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
+    <script src="path/to/your/script.js"></script>
+    <script>
+        // Adicionar sua lógica de perfil e configuração
+        let selectedProfileImage = '';
+
+        function selectProfileImage(imageUrl) {
+            selectedProfileImage = imageUrl;
+            alert('Imagem de perfil selecionada!');
+        }
+
+        // Adapte o código no script.js para usar a imagem de perfil selecionada
+    </script>
 </body>
 </html>
 
